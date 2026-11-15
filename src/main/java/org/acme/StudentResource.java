@@ -1,12 +1,11 @@
 package org.acme;
 
 import io.vertx.core.parsetools.RecordParser;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,9 +18,10 @@ import java.util.Map;
 public class StudentResource {
 
     private final Map<Long, Student> students = new HashMap<>();
+    private final UriInfo uriInfo;
     private Long nextId = 1L;
 
-    public StudentResource() {
+    public StudentResource(UriInfo uriInfo) {
         DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         Student s = Student.builder().id(nextId++)
                 .fullName("Gerald Unterrainer")
@@ -34,6 +34,7 @@ public class StudentResource {
                 .email("kasperl@unterrainer.info")
                 .birthDate(LocalDateTime.parse("1995-10-23 00:00", f)).build();
         students.put(s.getId(), s);
+        this.uriInfo = uriInfo;
     }
 
     @GET
@@ -52,5 +53,38 @@ public class StudentResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response students() {
         return Response.ok(students.values()).build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createStudent(Student incoming, @Context UriInfo uriInfo) {
+        incoming.setId(nextId);
+        students.put(incoming.getId(), incoming);
+        return Response.created(
+                uriInfo.getAbsolutePathBuilder().path(incoming.getId() + "").build()
+        ).entity(incoming).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteStudent(@PathParam("id") long id) {
+        students.remove(id);
+        return Response.noContent().build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateStudent(@PathParam("id") long id, Student incoming) {
+        if (!students.containsKey(id)) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "Student not found")).build();
+        }
+
+        incoming.setId(id);
+        students.put(id, incoming);
+        return Response.ok(incoming).build();
     }
 }
