@@ -2,6 +2,7 @@ package org.acme;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import org.acme.service.DatabaseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
 class StudentResourceMockServiceTest {
-    @InjectMock
+    @InjectSpy
     DatabaseService ds;
 
     @BeforeEach
@@ -43,5 +44,6 @@ class StudentResourceMockServiceTest {
                 .contentType("application/json")
                 .body("size()", is(2))
                 .body("[0].id", notNullValue());
+        Mockito.verify(ds, Mockito.times(1)).getStudents(); //changed from 2 -> 1
     }
 }
