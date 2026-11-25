@@ -18,11 +18,16 @@ import java.util.Map;
 
 @Path("/students")
 public class StudentResource {
-    @Inject
-    DatabaseService ds;
+    private final DatabaseService ds;
 
     private final Map<Long, Student> students = new HashMap<>();
     private Long nextId = 1L;
+
+    @Inject
+    public StudentResource(DatabaseService ds) {
+        this.ds = ds;
+        datasourceReset();
+    }
 
     void datasourceReset() {
         students.clear();
@@ -40,10 +45,6 @@ public class StudentResource {
                 .email("kasperl@unterrainer.info")
                 .birthDate(LocalDateTime.parse("1995-10-23 00:00", f)).build();
         ds.addStudent(s);
-    }
-
-    public StudentResource() {
-        datasourceReset();
     }
 
     @GET

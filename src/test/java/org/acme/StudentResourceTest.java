@@ -27,7 +27,7 @@ public class StudentResourceTest {
                     .get("/students")
                 .then()
                     .statusCode(200)
-                .contentType("/application/json")
+                .contentType("application/json")
                 .body("size()", is(2))
                 .body("[0].id", notNullValue());
     }
