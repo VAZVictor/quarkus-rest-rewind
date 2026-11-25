@@ -1,11 +1,13 @@
 package org.acme.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.Student;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@ApplicationScoped
 public class DatabaseService {
     private Long nextId = 1L;
     private final Map<Long, Student> students = new HashMap<>();
