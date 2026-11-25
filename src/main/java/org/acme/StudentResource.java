@@ -18,10 +18,12 @@ import java.util.Map;
 public class StudentResource {
 
     private final Map<Long, Student> students = new HashMap<>();
-    private final UriInfo uriInfo;
     private Long nextId = 1L;
 
-    public StudentResource(UriInfo uriInfo) {
+    void datasourceReset() {
+        students.clear();
+        nextId = 1L;
+
         DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         Student s = Student.builder().id(nextId++)
                 .fullName("Gerald Unterrainer")
@@ -34,7 +36,10 @@ public class StudentResource {
                 .email("kasperl@unterrainer.info")
                 .birthDate(LocalDateTime.parse("1995-10-23 00:00", f)).build();
         students.put(s.getId(), s);
-        this.uriInfo = uriInfo;
+    }
+
+    public StudentResource() {
+        datasourceReset();
     }
 
     @GET
